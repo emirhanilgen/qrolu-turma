@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Kod Oluşturucu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 3rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            color: white;
+        }
+        
+        .title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+        }
+        
+        .input-section {
+            margin-bottom: 3rem;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .input-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            opacity: 0.9;
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 400;
+            transition: all 0.3s ease;
+        }
+        
+        .url-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .url-input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .size-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .size-option {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .size-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .size-option.active {
+            background: rgba(78, 205, 196, 0.8);
+            border-color: #4ecdc4;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+        }
+        
+        .generate-btn {
+            padding: 1.2rem 3rem;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            margin-bottom: 3rem;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .qr-result {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .qr-code {
+            margin-bottom: 1.5rem;
+        }
+        
+        .qr-code canvas {
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .download-section {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .download-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            background: #333;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .download-btn:hover {
+            background: #555;
+            transform: translateY(-2px);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-desc {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .error-message {
+            background: rgba(255, 107, 107, 0.2);
+            border: 2px solid rgba(255, 107, 107, 0.5);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: #ff6b6b;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .size-controls {
+                gap: 0.5rem;
+            }
+            
+            .size-option {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .generate-btn {
+                padding: 1rem 2rem;
+                font-size: 1rem;
+            }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">📱 QR Kod Oluşturucu</h1>
+        <p class="subtitle">Linklerinizi anında QR koda dönüştürün ve indirin</p>
+        
+        <div class="input-section">
+            <div class="input-group">
+                <label class="input-label">🔗 URL veya Metin Girin</label>
+                <input type="text" class="url-input" id="urlInput" placeholder="https://example.com veya herhangi bir metin">
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+            
+            <div class="size-controls">
+                <div class="size-option" data-size="200">Küçük (200px)</div>
+                <div class="size-option active" data-size="300">Orta (300px)</div>
+                <div class="size-option" data-size="400">Büyük (400px)</div>
+            </div>
+            
+            <button class="generate-btn" id="generateBtn">
+                <span id="btnText">🎯 QR Kod Oluştur</span>
+                <div class="loading" id="loading" style="display: none;"></div>
+            </button>
+        </div>
+        
+        <div class="qr-result" id="qrResult">
+            <div class="qr-code" id="qrCode"></div>
+            <div class="download-section">
+                <button class="download-btn" id="downloadPng">
+                    📥 PNG İndir
+                </button>
+                <button class="download-btn" id="downloadJpg">
+                    📥 JPG İndir
+                </button>
+                <button class="download-btn" id="downloadSvg">
+                    📥 SVG İndir
+                </button>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-title">Hızlı Oluşturma</div>
+                <div class="feature-desc">Saniyeler içinde QR kod oluşturun</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <div class="feature-title">Mobil Uyumlu</div>
+                <div class="feature-desc">Tüm cihazlarda mükemmel çalışır</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🎨</div>
+                <div class="feature-title">Farklı Boyutlar</div>
+                <div class="feature-desc">İhtiyacınıza göre boyut seçin</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💾</div>
+                <div class="feature-title">Çoklu Format</div>
+                <div class="feature-desc">PNG, JPG ve SVG formatında indirin</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentQRCode = null;
+        let currentSize = 300;
+        let currentText = '';
+        
+        const urlInput = document.getElementById('urlInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const qrResult = document.getElementById('qrResult');
+        const qrCode = document.getElementById('qrCode');
+        const errorMessage = document.getElementById('errorMessage');
+        const loading = document.getElementById('loading');
+        const btnText = document.getElementById('btnText');
+        
+        // QR Code generation using Google Charts API
+        function generateQRCode(text) {
+            showLoading(true);
+            currentText = text;
+            
+            // Clear previous QR code
+            qrCode.innerHTML = '';
+            
+            try {
+                // Encode the text for URL
+                const encodedText = encodeURIComponent(text);
+                
+                // Create QR code using Google Charts API
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${currentSize}x${currentSize}&data=${encodedText}&format=png&margin=10`;
+                
+                // Create image element
+                const img = document.createElement('img');
+                img.style.borderRadius = '15px';
+                img.style.boxShadow = '0 8px 25px rgba(0,0,0,0.2)';
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                
+                img.onload = () => {
+                    showLoading(false);
+                    currentQRCode = img;
+                    qrCode.appendChild(img);
+                    qrResult.style.display = 'block';
+                    
+                    // Smooth scroll to result
+                    qrResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    setupDownloadButtons();
+                };
+                
+                img.onerror = () => {
+                    showLoading(false);
+                    showError('QR kod oluşturulurken bir hata oluştu! Lütfen tekrar deneyin.');
+                };
+                
+                img.src = qrUrl;
+                
+            } catch (error) {
+                showLoading(false);
+                showError('QR kod oluşturulurken bir hata oluştu!');
+            }
+        }
+        
+        // Size selection
+        document.querySelectorAll('.size-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                currentSize = parseInt(option.dataset.size);
+                
+                // Regenerate QR code if one exists
+                if (currentText) {
+                    generateQRCode(currentText);
+                }
+            });
+        });
+        
+        // Generate QR Code
+        generateBtn.addEventListener('click', () => {
+            const text = urlInput.value.trim();
+            
+            if (!text) {
+                showError('Lütfen bir URL veya metin girin!');
+                return;
+            }
+            
+            generateQRCode(text);
+        });
+        
+        // Enter key support
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                generateBtn.click();
+            }
+        });
+        
+        // Clear error on input
+        urlInput.addEventListener('input', () => {
+            hideError();
+        });
+        
+        function setupDownloadButtons() {
+            // PNG Download
+            document.getElementById('downloadPng').onclick = () => {
+                downloadQRCode('png');
+            };
+            
+            // JPG Download
+            document.getElementById('downloadJpg').onclick = () => {
+                downloadQRCode('jpg');
+            };
+            
+            // SVG Download
+            document.getElementById('downloadSvg').onclick = () => {
+                downloadQRCode('svg');
+            };
+        }
+        
+        function downloadQRCode(format) {
+            if (!currentText) return;
+            
+            const encodedText = encodeURIComponent(currentText);
+            let downloadUrl;
+            
+            if (format === 'svg') {
+                downloadUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${currentSize}x${currentSize}&data=${encodedText}&format=svg&margin=10`;
+            } else {
+                downloadUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${currentSize}x${currentSize}&data=${encodedText}&format=png&margin=10`;
+            }
+            
+            // Create temporary link and download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `qr-code-${Date.now()}.${format}`;
+            link.target = '_blank';
+            
+            // For better browser compatibility
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            urlInput.style.borderColor = 'rgba(255, 107, 107, 0.8)';
+        }
+        
+        function hideError() {
+            errorMessage.style.display = 'none';
+            urlInput.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        }
+        
+        function showLoading(show) {
+            if (show) {
+                btnText.style.display = 'none';
+                loading.style.display = 'inline-block';
+                generateBtn.disabled = true;
+            } else {
+                btnText.style.display = 'inline';
+                loading.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        }
+        
+        // Auto-focus input on load
+        window.addEventListener('load', () => {
+            urlInput.focus();
+        });
+        
+        // Sample URLs for demonstration
+        const sampleUrls = [
+            'https://www.google.com',
+            'https://www.youtube.com',
+            'https://www.github.com',
+            'Merhaba Dünya!',
+            'Bu bir QR kod testidir.'
+        ];
+        
+        // Add sample button functionality (optional)
+        urlInput.addEventListener('focus', () => {
+            if (!urlInput.value) {
+                urlInput.placeholder = sampleUrls[Math.floor(Math.random() * sampleUrls.length)];
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97c523d390e3d60b',t:'MTc1NzQwNDcwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
